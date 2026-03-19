@@ -1,0 +1,109 @@
+<script setup lang="ts">
+import { computed, ref } from 'vue'
+// 定义 list 类型
+type TaskList = {
+  id: number
+  name: string
+}
+
+// 定义 task 类型
+type Task = {
+  id: number
+  title: string
+  status: string
+  description?: string
+  dueDate?: string
+}
+
+// 接收父組件傳來的資料
+defineProps<{
+  selectedList: TaskList | null
+  tasks: Task[]
+  selectedTaskId: number | null
+}>()
+
+// 向父組件發送事件
+const emit = defineEmits<{
+  (e: 'select-task', task: Task): void
+  (e: 'toggle-task-status', taskId: number): void
+}>()
+
+// 控制已完成区是否展开（默认收起）
+const showCompleted = ref(false)
+
+
+// TODO 任务
+const todoTasks = computed(() => {
+  return props.tasks.filter((task) => task.status === 'TODO')
+})
+
+// DONE 任务
+const doneTasks = computed(() => {
+  return props.tasks.filter((task) => task.status === 'DONE')
+})
+
+// 点击任务时，通知父组件
+function handleTaskClick(task: Task) {
+  emit('select-task', task)
+}
+
+// 點擊狀態按鈕：切換 TODO / DONE
+function handleToggleStatus(taskId: number) {
+  emit('toggle-task-status', taskId)
+}
+
+function toggleCompleted() {
+  showCompleted.value = !showCompleted.value
+}
+
+</script>
+
+<template>
+  <main class="flex-1 p-6">
+    <!-- 沒選 list 時 -->
+    <div v-if="!selectedList" class="mt-10 text-center text-gray-400">
+      暫無可展示內容
+    </div>
+
+    <!-- 有選 list 時 -->
+    <div v-else>
+      <h2 class="mb-4 text-2xl font-bold">
+        {{ selectedList.name }}
+      </h2>
+
+      <ul class="space-y-3">
+        <li
+          v-for="task in tasks"
+          :key="task.id"
+          class="rounded-md border p-4 transition"
+          :class="
+            selectedTaskId === task.id
+              ? 'border-black bg-gray-100'
+              : 'border-gray-200'
+          "
+        >
+          <div class="flex items-center justify-between gap-4">
+            <!-- 左邊區塊：點擊後選中 task -->
+            <div
+              class="flex-1 cursor-pointer"
+              @click="handleTaskClick(task)"
+            >
+              <p class="font-medium">{{ task.title }}</p>
+              <p class="mt-1 text-sm text-gray-500">
+                {{ task.status }}
+              </p>
+            </div>
+
+            <!-- 右邊按鈕：切換狀態 -->
+            <button
+              class="rounded-md border px-3 py-1 text-sm hover:bg-gray-50"
+              @click="handleToggleStatus(task.id)"
+            >
+              {{ task.status === 'TODO' ? 'Mark Done' : 'Mark Todo' }}
+            </button>
+          </div>
+        </li>
+      </ul>
+    </div>
+  </main>
+</template>
