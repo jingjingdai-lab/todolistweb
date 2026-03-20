@@ -16,7 +16,7 @@ type Task = {
 }
 
 // 接收父組件傳來的資料
-defineProps<{
+const props = defineProps<{
   selectedList: TaskList | null
   tasks: Task[]
   selectedTaskId: number | null
@@ -71,39 +71,86 @@ function toggleCompleted() {
         {{ selectedList.name }}
       </h2>
 
-      <ul class="space-y-3">
-        <li
-          v-for="task in tasks"
-          :key="task.id"
-          class="rounded-md border p-4 transition"
-          :class="
-            selectedTaskId === task.id
-              ? 'border-black bg-gray-100'
-              : 'border-gray-200'
-          "
-        >
-          <div class="flex items-center justify-between gap-4">
-            <!-- 左邊區塊：點擊後選中 task -->
-            <div
-              class="flex-1 cursor-pointer"
-              @click="handleTaskClick(task)"
-            >
-              <p class="font-medium">{{ task.title }}</p>
-              <p class="mt-1 text-sm text-gray-500">
-                {{ task.status }}
-              </p>
-            </div>
+      <!-- TODO 區 -->
+       <ul class="space-y-3">
+         <li
+           v-for="task in todoTasks"
+           :key="task.id"
+            class="rounded-md border p-4 transition"
+           :class="
+             selectedTaskId === task.id
+               ? 'border-black bg-gray-100'
+               : 'border-gray-200'
+           "
+         >
+           <div class="flex items-center justify-between gap-4">
+             <!-- 左邊區塊：點擊後選中 task -->
+             <div
+               class="flex-1 cursor-pointer"
+               @click="handleTaskClick(task)"
+             >
+               <p class="font-medium">{{ task.title }}</p>
+               <p class="mt-1 text-sm text-gray-500">
+                  {{ task.status }}
+               </p>
+             </div>
 
-            <!-- 右邊按鈕：切換狀態 -->
-            <button
-              class="rounded-md border px-3 py-1 text-sm hover:bg-gray-50"
-              @click="handleToggleStatus(task.id)"
-            >
-              {{ task.status === 'TODO' ? 'Mark Done' : 'Mark Todo' }}
-            </button>
-          </div>
-        </li>
-      </ul>
+             <!-- 右邊按鈕：切換狀態 -->
+             <button
+               class="rounded-md border px-3 py-1 text-sm hover:bg-gray-50"
+               @click="handleToggleStatus(task.id)"
+             >
+               Mark Done
+             </button>
+           </div>
+          </li>
+       </ul>
+
+       <!-- DONE 區標題 -->
+       <div class="mt-6 border-t pt-4">
+         <button
+           class="flex items-center gap-2 text-sm font-medium text-gray-600 hover:text-black"
+           @click="toggleCompleted"
+         >
+           <span>{{ showCompleted ? '▼' : '▶' }}</span>
+           <span>Mes tâches terminées ({{ doneTasks.length }})</span>
+         </button>
+        </div>
+
+        <!-- DONE 區內容（默認收起） -->
+       <ul v-if="showCompleted" class="mt-3 space-y-3">
+         <li
+           v-for="task in doneTasks"
+            :key="task.id"
+          class="rounded-md border p-4 transition opacity-70"
+           :class="
+             selectedTaskId === task.id
+               ? 'border-black bg-gray-100'
+               : 'border-gray-200'
+           "
+         >
+           <div class="flex items-center justify-between gap-4">
+             <!-- 左邊區塊：點擊後選中 task -->
+             <div
+               class="flex-1 cursor-pointer"
+               @click="handleTaskClick(task)"
+             >
+               <p class="font-medium line-through">{{ task.title }}</p>
+               <p class="mt-1 text-sm text-gray-500">
+                 {{ task.status }}
+               </p>
+             </div>
+
+             <!-- 右邊按鈕：切換回 TODO -->
+             <button
+               class="rounded-md border px-3 py-1 text-sm hover:bg-gray-50"
+               @click="handleToggleStatus(task.id)"
+             >
+               Mark Todo
+             </button>
+           </div>
+         </li>
+       </ul>
     </div>
   </main>
 </template>
