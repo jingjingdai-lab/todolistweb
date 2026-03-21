@@ -125,7 +125,7 @@ function handleDeleteTask(taskId: number) {
   <main class="flex-1 p-6">
     <!-- 沒選 list 時 -->
     <div v-if="!selectedList" class="mt-10 text-center text-gray-400">
-      暫無可展示內容
+      No items to display
     </div>
 
     <!-- 有選 list 時 -->

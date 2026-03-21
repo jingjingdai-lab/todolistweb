@@ -34,7 +34,7 @@ function formatDate(date?: string) {
 
     <!-- 没有选中任务时 -->
     <div v-if="!selectedTask" class="mt-6 text-gray-400">
-      请选择一个任务查看详情
+      Select a task to view details.
     </div>
 
     <!-- 有选中任务时 -->

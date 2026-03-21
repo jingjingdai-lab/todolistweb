@@ -3,16 +3,30 @@ import { ref, computed, onMounted } from 'vue'
 import SidebarLeft from '@/components/layout/SidebarLeft.vue'
 import MainContent from '@/components/layout/MainContent.vue'
 import SidebarRight from '@/components/layout/SidebarRight.vue'
+import { useRouter } from 'vue-router'
 import axios from 'axios'
 
 onMounted(async () => {
-  const tasksRes = await axios.get('http://localhost:3000/tasks')
-  tasks.value = tasksRes.data
+  try {
+    console.log('准备获取 lists')
+    console.log('headers =', getAuthHeaders())
 
-  const listsRes = await axios.get('http://localhost:3000/lists')
-  lists.value = listsRes.data
+    const res = await axios.get('http://localhost:3000/lists', {
+      headers: getAuthHeaders(),
+    })
+
+    console.log('lists res =', res.data)
+    lists.value = res.data
+
+    if (lists.value.length > 0) {
+      selectedListId.value = lists.value[0].id
+    }
+
+    await fetchTasks()
+  } catch (error) {
+    console.error('获取 lists 失败：', error)
+  }
 })
-
 
 // list 类型
 type TaskList = {
@@ -58,6 +72,24 @@ const currentTasks = computed(() => {
   return tasks.value.filter(task => task.taskList?.id === selectedListId.value)
 })
 
+
+//logout
+const router = useRouter()
+
+//绑定
+const getAuthHeaders = () => {
+  const token = localStorage.getItem('token')
+
+  return {
+    Authorization: `Bearer ${token}`,
+  }
+}
+
+const handleLogout = () => {
+  localStorage.removeItem('token')
+  router.push('/login')
+}
+
 // 点击左侧 list
 function handleSelectList(listId: number) {
   selectedListId.value = listId
@@ -90,17 +122,26 @@ async function createList() {
   const name = prompt('List name?')
   if (!name) return
 
-  await axios.post('http://localhost:3000/lists', {
-    name,
-  })
+  await axios.post(
+  'http://localhost:3000/lists',
+      {
+        name,
+      },
+      {
+        headers: getAuthHeaders(),
+      }
+    )
 
-  // 重新加载 lists
-  const res = await axios.get('http://localhost:3000/lists')
-  lists.value = res.data
+    const res = await axios.get('http://localhost:3000/lists', {
+      headers: getAuthHeaders(),
+    })
+    lists.value = res.data
 }
 
 async function fetchTasks() {
-  const res = await axios.get('http://localhost:3000/tasks')
+  const res = await axios.get('http://localhost:3000/tasks', {
+    headers: getAuthHeaders(),
+  })
   tasks.value = res.data
 }
 
@@ -145,9 +186,13 @@ async function deleteList(listId: number) {
   if (!confirmed) return
 
   try {
-    await axios.delete(`http://localhost:3000/lists/${listId}`)
+    await axios.delete(`http://localhost:3000/lists/${listId}`, {
+      headers: getAuthHeaders(),
+    })
 
-    const res = await axios.get('http://localhost:3000/lists')
+    const res = await axios.get('http://localhost:3000/lists', {
+      headers: getAuthHeaders(),
+    })
     lists.value = res.data
 
     if (selectedListId.value === listId) {
@@ -201,7 +246,15 @@ function handleNewTaskDueDate(value: string) {
 <template>
   <!-- 三栏整体布局 -->
   <div class="flex h-screen bg-white text-black">
-    <!-- 左侧 -->
+
+    <button
+      @click="handleLogout"
+      class="absolute right-6 top-6 z-50 rounded-md bg-black px-4 py-2 text-sm text-white hover:opacity-90"
+    >
+      Logout
+    </button>
+
+      <!-- 左侧 -->
     <SidebarLeft
       :lists="lists"
       :selected-list-id="selectedListId"

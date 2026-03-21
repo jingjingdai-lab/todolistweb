@@ -1,25 +1,57 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { TaskList } from './entities/task-list.entity';
+import { User } from '../users/entities/user.entity';
 
 @Injectable()
 export class ListsService {
   constructor(
     @InjectRepository(TaskList)
     private readonly listRepository: Repository<TaskList>,
+
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
   ) {}
 
-  findAll() {
-    return this.listRepository.find();
+  findAllByUser(userId: number) {
+    return this.listRepository.find({
+      where: {
+        user: { id: userId },
+      },
+      relations: ['tasks'],
+    });
   }
 
-  async create(name: string) {
-    const list = this.listRepository.create({ name });
+  async create(name: string, userId: number) {
+    const user = await this.userRepository.findOne({
+      where: { id: userId },
+    });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    const list = this.listRepository.create({
+      name,
+      user,
+    });
+
     return this.listRepository.save(list);
   }
 
-  async remove(id: number) {
-    return this.listRepository.delete(id);
+  async remove(id: number, userId: number) {
+    const list = await this.listRepository.findOne({
+      where: {
+        id,
+        user: { id: userId },
+      },
+    });
+
+    if (!list) {
+      throw new NotFoundException('List not found');
+    }
+
+    return this.listRepository.remove(list);
   }
 }
