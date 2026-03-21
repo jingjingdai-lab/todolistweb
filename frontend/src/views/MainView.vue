@@ -1,8 +1,18 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import SidebarLeft from '@/components/layout/SidebarLeft.vue'
 import MainContent from '@/components/layout/MainContent.vue'
 import SidebarRight from '@/components/layout/SidebarRight.vue'
+import axios from 'axios'
+
+onMounted(async () => {
+  const tasksRes = await axios.get('http://localhost:3000/tasks')
+  taskMap.value = tasksRes.data
+
+  const listsRes = await axios.get('http://localhost:3000/lists')
+  lists.value = listsRes.data
+})
+
 
 // list 类型
 type TaskList = {
@@ -19,66 +29,8 @@ type Task = {
   dueDate: string
 }
 
-// 所有 task 資料放在 MainView
-// 用 listId 當 key，對應每個 list 的 task
-const taskMap = ref<Record<number, Task[]>>({
-  1: [
-    {
-      id: 1,
-      title: 'Finish technical test',
-      status: 'TODO',
-      description: 'Complete the main page and interactions',
-      dueDate: '2026-03-20',
-    },
-    {
-      id: 2,
-      title: 'Prepare meeting notes',
-      status: 'DONE',
-      description: 'Summarize key discussion points',
-      dueDate: '2026-03-18',
-    },
-  ],
-  2: [
-    {
-      id: 3,
-      title: 'Buy groceries',
-      status: 'TODO',
-      description: 'Milk, eggs, bread and vegetables',
-      dueDate: '2026-03-19',
-    },
-    {
-      id: 4,
-      title: 'Clean the room',
-      status: 'TODO',
-      description: 'Organize desk and vacuum the floor',
-      dueDate: '2026-03-21',
-    },
-  ],
-  3: [
-    {
-      id: 5,
-      title: 'Review Vue basics',
-      status: 'DONE',
-      description: 'Go through props, emits and computed',
-      dueDate: '2026-03-17',
-    },
-    {
-      id: 6,
-      title: 'Practice TypeScript',
-      status: 'TODO',
-      description: 'Define component prop types clearly',
-      dueDate: '2026-03-22',
-    },
-  ],
-})
-
-// 左侧假数据
-const lists = ref<TaskList[]>([
-  { id: 1, name: 'Work' },
-  { id: 2, name: 'Personal' },
-  { id: 3, name: 'Study' },
-])
-
+const taskMap = ref([])
+const lists = ref([])
 // 當前選中的 list id
 const selectedListId = ref<number | null>(null)
 
@@ -131,8 +83,30 @@ function handleToggleTaskStatus(taskId: number) {
   }
 }
 
+async function createList() {
+  const name = prompt('List name?')
+  if (!name) return
 
+  await axios.post('http://localhost:3000/lists', {
+    name,
+  })
 
+  // 重新加载 lists
+  const res = await axios.get('http://localhost:3000/lists')
+  lists.value = res.data
+}
+
+async function deleteList(listId: number) {
+  await axios.delete(`http://localhost:3000/lists/${listId}`)
+
+  const res = await axios.get('http://localhost:3000/lists')
+  lists.value = res.data
+
+  // 可选：如果删的是当前选中的 list
+  if (selectedListId.value === listId) {
+    selectedListId.value = null
+  }
+}
 
 </script>
 
@@ -146,6 +120,8 @@ function handleToggleTaskStatus(taskId: number) {
       :lists="lists"
       :selected-list-id="selectedListId"
       @select-list="handleSelectList"
+      @create-list="createList"
+      @delete-list="deleteList"
     />
 
     <!-- 中间 -->
