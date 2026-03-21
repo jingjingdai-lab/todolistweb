@@ -97,14 +97,21 @@ async function createList() {
 }
 
 async function deleteList(listId: number) {
-  await axios.delete(`http://localhost:3000/lists/${listId}`)
+  const confirmed = window.confirm('Are you sure you want to delete this list?')
+  if (!confirmed) return
 
-  const res = await axios.get('http://localhost:3000/lists')
-  lists.value = res.data
+  try {
+    await axios.delete(`http://localhost:3000/lists/${listId}`)
 
-  // 可选：如果删的是当前选中的 list
-  if (selectedListId.value === listId) {
-    selectedListId.value = null
+    const res = await axios.get('http://localhost:3000/lists')
+    lists.value = res.data
+
+    if (selectedListId.value === listId) {
+      selectedListId.value = null
+    }
+  } catch (error) {
+    console.error('Failed to delete list:', error)
+    alert('Failed to delete the list.')
   }
 }
 
