@@ -7,7 +7,7 @@ import axios from 'axios'
 
 onMounted(async () => {
   const tasksRes = await axios.get('http://localhost:3000/tasks')
-  taskMap.value = tasksRes.data
+  tasks.value = tasksRes.data
 
   const listsRes = await axios.get('http://localhost:3000/lists')
   lists.value = listsRes.data
@@ -26,11 +26,20 @@ type Task = {
   title: string
   status: 'TODO' | 'DONE'
   description?: string
-  dueDate: string
+  dueDate?: string
+  taskList?: {
+    id: number
+  }
+  createdAt?: string   // 加这一行
 }
 
-const taskMap = ref([])
-const lists = ref([])
+const tasks = ref<Task[]>([])
+const lists = ref<TaskList[]>([])
+const newTaskTitle = ref('')
+const newTaskShortDescription = ref('')
+const newTaskDescription = ref('')
+const newTaskDueDate = ref('')
+
 // 當前選中的 list id
 const selectedListId = ref<number | null>(null)
 
@@ -44,10 +53,10 @@ const selectedList = computed(() => {
 
 // 根據目前選中的 list，算出它的 tasks
 const currentTasks = computed(() => {
-  if (!selectedListId.value) return []
-  return taskMap.value[selectedListId.value] ?? []
-})
+  if (selectedListId.value === null) return []
 
+  return tasks.value.filter(task => task.taskList?.id === selectedListId.value)
+})
 
 // 点击左侧 list
 function handleSelectList(listId: number) {
@@ -62,24 +71,18 @@ function handleSelectTask(task: Task) {
   selectedTask.value = task
 }
 
-function handleToggleTaskStatus(taskId: number) {
-  // 沒選 list 時，不做任何事
-  if (!selectedListId.value) return
+async function handleToggleTaskStatus(taskId: number) {
+  try {
+    await axios.patch(`http://localhost:3000/tasks/${taskId}/toggle`)
+    await fetchTasks()
 
-  // 取出當前 list 的 task 陣列
-  const tasks = taskMap.value[selectedListId.value]
-  if (!tasks) return
-
-  // 找到被點擊的 task
-  const targetTask = tasks.find((task) => task.id === taskId)
-  if (!targetTask) return
-
-  // TODO <-> DONE 切換
-  targetTask.status = targetTask.status === 'TODO' ? 'DONE' : 'TODO'
-
-  // 如果右側正在顯示這個 task，也同步更新 selectedTask
-  if (selectedTask.value && selectedTask.value.id === taskId) {
-    selectedTask.value = { ...targetTask }
+    if (selectedTask.value && selectedTask.value.id === taskId) {
+      const updatedTask = tasks.value.find(task => task.id === taskId) ?? null
+      selectedTask.value = updatedTask
+    }
+  } catch (error) {
+    console.error('Failed to toggle task status:', error)
+    alert('Failed to update task status.')
   }
 }
 
@@ -96,6 +99,47 @@ async function createList() {
   lists.value = res.data
 }
 
+async function fetchTasks() {
+  const res = await axios.get('http://localhost:3000/tasks')
+  tasks.value = res.data
+}
+
+async function addTask() {
+  console.log('addTask triggered')
+  console.log('newTaskTitle =', newTaskTitle.value)
+  console.log('selectedListId =', selectedListId.value)
+
+  if (!newTaskTitle.value.trim() || selectedListId.value === null) {
+    console.log('blocked by validation')
+    return
+  }
+
+  try {
+    const res = await axios.post('http://localhost:3000/tasks', {
+      title: newTaskTitle.value,
+      shortDescription: newTaskShortDescription.value,
+      description: newTaskDescription.value,
+      dueDate: newTaskDueDate.value,
+      taskListId: selectedListId.value,
+    })
+
+    console.log('POST success:', res.data)
+
+    newTaskTitle.value = ''
+    newTaskShortDescription.value = ''
+    newTaskDescription.value = ''
+    newTaskDueDate.value = ''
+
+    await fetchTasks()
+    console.log('tasks after refresh:', tasks.value)
+  } catch (error) {
+    console.error('Failed to add task:', error)
+    alert('Failed to add task.')
+  }
+}
+
+
+
 async function deleteList(listId: number) {
   const confirmed = window.confirm('Are you sure you want to delete this list?')
   if (!confirmed) return
@@ -108,11 +152,46 @@ async function deleteList(listId: number) {
 
     if (selectedListId.value === listId) {
       selectedListId.value = null
+      selectedTask.value = null
     }
   } catch (error) {
     console.error('Failed to delete list:', error)
     alert('Failed to delete the list.')
   }
+}
+
+async function deleteTask(taskId: number) {
+  const confirmed = window.confirm('Are you sure you want to delete this task?')
+  if (!confirmed) return
+
+  try {
+    await axios.delete(`http://localhost:3000/tasks/${taskId}`)
+    await fetchTasks()
+
+    if (selectedTask.value && selectedTask.value.id === taskId) {
+      selectedTask.value = null
+    }
+  } catch (error) {
+    console.error('Failed to delete task:', error)
+    alert('Failed to delete task.')
+  }
+}
+
+function handleNewTaskTitle(value: string) {
+  console.log('parent received:', value)
+  newTaskTitle.value = value
+}
+
+function handleNewTaskShortDescription(value: string) {
+  newTaskShortDescription.value = value
+}
+
+function handleNewTaskDescription(value: string) {
+  newTaskDescription.value = value
+}
+
+function handleNewTaskDueDate(value: string) {
+  newTaskDueDate.value = value
 }
 
 </script>
@@ -131,13 +210,22 @@ async function deleteList(listId: number) {
       @delete-list="deleteList"
     />
 
-    <!-- 中间 -->
     <MainContent
       :selected-list="selectedList"
       :tasks="currentTasks"
       :selected-task-id="selectedTask?.id ?? null"
+      :new-task-title="newTaskTitle"
+      :new-task-short-description="newTaskShortDescription"
+      :new-task-description="newTaskDescription"
+      :new-task-due-date="newTaskDueDate"
       @select-task="handleSelectTask"
       @toggle-task-status="handleToggleTaskStatus"
+      @update:new-task-title="handleNewTaskTitle"
+      @update:new-task-short-description="handleNewTaskShortDescription"
+      @update:new-task-description="handleNewTaskDescription"
+      @update:new-task-due-date="handleNewTaskDueDate"
+      @add-task="addTask"
+      @delete-task="deleteTask"
     />
     <!-- 右侧 -->
     <SidebarRight :selected-task="selectedTask" />

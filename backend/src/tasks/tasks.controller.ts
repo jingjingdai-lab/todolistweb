@@ -1,4 +1,12 @@
-import { Body, Controller, Get, Patch, Param, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Patch,
+  Param,
+  Post,
+  Delete,
+} from '@nestjs/common';
 import { TasksService } from './tasks.service';
 
 @Controller('tasks')
@@ -13,8 +21,26 @@ export class TasksController {
 
   // ✅ 创建任务
   @Post()
-  create(@Body('title') title: string, @Body('taskListId') taskListId: number) {
-    return this.tasksService.create(title, taskListId);
+  create(
+    @Body('title') title: string,
+    @Body('shortDescription') shortDescription: string,
+    @Body('description') description: string,
+    @Body('dueDate') dueDate: string,
+    @Body('taskListId') taskListId: number,
+  ) {
+    return this.tasksService.create(
+      title,
+      shortDescription,
+      description,
+      dueDate,
+      taskListId,
+    );
+  }
+
+  //删除任务
+  @Delete(':id')
+  remove(@Param('id') id: string) {
+    return this.tasksService.remove(Number(id));
   }
 
   // ✅ 切换状态

@@ -18,11 +18,20 @@ export class TasksService {
   }
 
   // ✅ 创建任务
-  async create(title: string, taskListId: number) {
+  async create(
+    title: string,
+    shortDescription: string,
+    description: string,
+    dueDate: string,
+    taskListId: number,
+  ) {
     const task = this.taskRepository.create({
       title,
+      shortDescription,
+      description,
+      dueDate: dueDate ? new Date(dueDate) : null,
       status: 'TODO',
-      taskList: { id: taskListId }, // ⭐ 关键！
+      taskList: { id: taskListId },
     });
 
     return this.taskRepository.save(task);
@@ -41,5 +50,19 @@ export class TasksService {
     task.status = task.status === 'TODO' ? 'DONE' : 'TODO';
 
     return this.taskRepository.save(task);
+  }
+  //删除task
+  async remove(id: number) {
+    const task = await this.taskRepository.findOne({
+      where: { id },
+    });
+
+    if (!task) {
+      throw new Error('Task not found');
+    }
+
+    await this.taskRepository.remove(task);
+
+    return { message: 'Task deleted successfully' };
   }
 }

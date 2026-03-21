@@ -10,13 +10,16 @@ export class Task {
   title: string;
 
   @Column({ nullable: true })
+  shortDescription: string;
+
+  @Column({ type: 'text', nullable: true })
   description: string;
 
   @Column({ default: 'TODO' })
   status: string;
 
-  @Column({ nullable: true })
-  dueDate: string;
+  @Column({ type: 'timestamp', nullable: true })
+  dueDate: Date | null;
 
   @Column({
     type: 'timestamp',

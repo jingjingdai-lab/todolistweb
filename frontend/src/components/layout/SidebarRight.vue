@@ -4,14 +4,27 @@ type Task = {
   id: number
   title: string
   status: string
-  description?: string
-  dueDate?: string
+  shortDescription: string
+  description?: string | null
+  dueDate: string
+  createdAt?: string
 }
 
 // 接收父组件传来的当前选中任务
 defineProps<{
   selectedTask: Task | null
 }>()
+
+function formatDate(date?: string) {
+  if (!date) return '—'
+  return new Date(date).toLocaleString('fr-FR', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+  })
+}
 </script>
 
 <template>
@@ -38,11 +51,17 @@ defineProps<{
         <p class="mt-1">{{ selectedTask.status }}</p>
       </div>
 
-      <!-- 任务描述 -->
+      <!-- 短描述 -->
       <div>
-        <p class="text-sm text-gray-500">Description</p>
+        <p class="text-sm text-gray-500">Short description</p>
+        <p class="mt-1">{{ selectedTask.shortDescription }}</p>
+      </div>
+
+      <!-- 长描述 -->
+      <div>
+        <p class="text-sm text-gray-500">Long description</p>
         <p class="mt-1">
-          {{ selectedTask.description || 'No description' }}
+          {{ selectedTask.description || 'No long description' }}
         </p>
       </div>
 
@@ -50,7 +69,15 @@ defineProps<{
       <div>
         <p class="text-sm text-gray-500">Due date</p>
         <p class="mt-1">
-          {{ selectedTask.dueDate || 'No due date' }}
+          {{ formatDate(selectedTask.dueDate) }}
+        </p>
+      </div>
+
+      <!-- 创建日期 -->
+      <div>
+        <p class="text-sm text-gray-500">Created at</p>
+        <p class="mt-1">
+          {{ formatDate(selectedTask.createdAt) }}
         </p>
       </div>
     </div>
