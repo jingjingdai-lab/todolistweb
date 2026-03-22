@@ -176,14 +176,6 @@ function handleDeleteTask(taskId: number) {
               >
                 Mark Done
               </button>
-
-              <button
-                type="button"
-                class="rounded-md border border-red-300 px-3 py-1 text-sm text-red-600 hover:bg-red-50"
-                @click="handleDeleteTask(task.id)"
-              >
-                Delete
-              </button>
             </div>
           </div>
         </li>
@@ -232,14 +224,6 @@ function handleDeleteTask(taskId: number) {
                 @click="handleToggleStatus(task.id)"
               >
                 Mark Todo
-              </button>
-
-              <button
-                type="button"
-                class="rounded-md border border-red-300 px-3 py-1 text-sm text-red-600 hover:bg-red-50"
-                @click="handleDeleteTask(task.id)"
-              >
-                Delete
               </button>
             </div>
           </div>

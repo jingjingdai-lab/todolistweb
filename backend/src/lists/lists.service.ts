@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { TaskList } from './entities/task-list.entity';
@@ -32,8 +36,21 @@ export class ListsService {
       throw new NotFoundException('User not found');
     }
 
+    const normalizedName = name.trim();
+
+    const existingList = await this.listRepository.findOne({
+      where: {
+        name: normalizedName,
+        user: { id: userId },
+      },
+    });
+
+    if (existingList) {
+      throw new BadRequestException('List name already exists');
+    }
+
     const list = this.listRepository.create({
-      name,
+      name: normalizedName,
       user,
     });
 

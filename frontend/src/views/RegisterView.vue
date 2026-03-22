@@ -9,6 +9,7 @@ const firstName = ref('')
 const lastName = ref('')
 const email = ref('')
 const password = ref('')
+const confirmEmail = ref('')
 const confirmPassword = ref('')
 const errorMessage = ref('')
 const successMessage = ref('')
@@ -21,10 +22,16 @@ const handleRegister = async () => {
     !firstName.value ||
     !lastName.value ||
     !email.value ||
+    !confirmEmail.value ||
     !password.value ||
     !confirmPassword.value
   ) {
     errorMessage.value = 'Please fill in all fields.'
+    return
+  }
+
+  if (email.value !== confirmEmail.value) {
+    errorMessage.value = 'Emails do not match.'
     return
   }
 
@@ -52,6 +59,8 @@ const handleRegister = async () => {
       error?.response?.data?.message || 'Register failed.'
   }
 }
+
+
 </script>
 
 <template>
@@ -84,6 +93,7 @@ const handleRegister = async () => {
           />
         </div>
 
+        <!-- Email -->
         <div>
           <label class="mb-1 block text-sm font-medium text-gray-700">
             Email
@@ -96,6 +106,20 @@ const handleRegister = async () => {
           />
         </div>
 
+        <!-- Confirm Email（新增） -->
+        <div>
+          <label class="mb-1 block text-sm font-medium text-gray-700">
+            Confirm email
+          </label>
+          <input
+            v-model="confirmEmail"
+            type="email"
+            placeholder="Confirm your email"
+            class="w-full rounded-md border border-gray-300 px-4 py-2 outline-none focus:border-black"
+          />
+        </div>
+
+        <!-- Password -->
         <div>
           <label class="mb-1 block text-sm font-medium text-gray-700">
             Password
@@ -108,6 +132,7 @@ const handleRegister = async () => {
           />
         </div>
 
+        <!-- Confirm Password -->
         <div>
           <label class="mb-1 block text-sm font-medium text-gray-700">
             Confirm password

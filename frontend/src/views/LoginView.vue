@@ -23,13 +23,21 @@ const handleLogin = async () => {
       password: password.value,
     })
 
+    console.log('login response:', response.data)
+
+    // ✅ 存 token
     localStorage.setItem('token', response.data.access_token)
+
+    // ✅ 新增：存 user（重点！！）
+    localStorage.setItem('user', JSON.stringify(response.data.user))
+
     router.push('/')
   } catch (error: any) {
     errorMessage.value =
       error?.response?.data?.message || 'Invalid email or password.'
   }
 }
+
 </script>
 
 <template>

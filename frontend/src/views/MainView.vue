@@ -5,6 +5,9 @@ import MainContent from '@/components/layout/MainContent.vue'
 import SidebarRight from '@/components/layout/SidebarRight.vue'
 import { useRouter } from 'vue-router'
 import axios from 'axios'
+const showCreateListModal = ref(false)
+const newListName = ref('')
+const listModalError = ref('')
 
 onMounted(async () => {
   try {
@@ -98,6 +101,16 @@ function handleSelectList(listId: number) {
   selectedTask.value = null
 }
 
+
+//头像user部分
+const user = JSON.parse(localStorage.getItem('user') || '{}')
+
+const userInitial = computed(() => {
+  const first = user.firstName?.charAt(0)?.toUpperCase() || ''
+  const last = user.lastName?.charAt(0)?.toUpperCase() || ''
+  return first + last || 'U'
+})
+
 // 点击中间 task
 function handleSelectTask(task: Task) {
   selectedTask.value = task
@@ -118,14 +131,23 @@ async function handleToggleTaskStatus(taskId: number) {
   }
 }
 
-async function createList() {
-  const name = prompt('List name?')
-  if (!name) return
+function createList() {
+  newListName.value = ''
+  listModalError.value = ''
+  showCreateListModal.value = true
+}
 
-  await axios.post(
-  'http://localhost:3000/lists',
+async function submitCreateList() {
+  if (!newListName.value.trim()) {
+    listModalError.value = 'Please enter a list name.'
+    return
+  }
+
+  try {
+    await axios.post(
+      'http://localhost:3000/lists',
       {
-        name,
+        name: newListName.value.trim(),
       },
       {
         headers: getAuthHeaders(),
@@ -136,6 +158,15 @@ async function createList() {
       headers: getAuthHeaders(),
     })
     lists.value = res.data
+
+    showCreateListModal.value = false
+    newListName.value = ''
+    listModalError.value = ''
+  } catch (error: any) {
+    console.error('Create list error:', error)
+    listModalError.value =
+      error?.response?.data?.message || 'Failed to create list'
+  }
 }
 
 async function fetchTasks() {
@@ -244,17 +275,8 @@ function handleNewTaskDueDate(value: string) {
 
 
 <template>
-  <!-- 三栏整体布局 -->
-  <div class="flex h-screen bg-white text-black">
-
-    <button
-      @click="handleLogout"
-      class="absolute right-6 top-6 z-50 rounded-md bg-black px-4 py-2 text-sm text-white hover:opacity-90"
-    >
-      Logout
-    </button>
-
-      <!-- 左侧 -->
+  <div class="flex h-screen bg-gray-50 text-black overflow-hidden">
+    <!-- 左侧 -->
     <SidebarLeft
       :lists="lists"
       :selected-list-id="selectedListId"
@@ -263,24 +285,94 @@ function handleNewTaskDueDate(value: string) {
       @delete-list="deleteList"
     />
 
-    <MainContent
-      :selected-list="selectedList"
-      :tasks="currentTasks"
-      :selected-task-id="selectedTask?.id ?? null"
-      :new-task-title="newTaskTitle"
-      :new-task-short-description="newTaskShortDescription"
-      :new-task-description="newTaskDescription"
-      :new-task-due-date="newTaskDueDate"
-      @select-task="handleSelectTask"
-      @toggle-task-status="handleToggleTaskStatus"
-      @update:new-task-title="handleNewTaskTitle"
-      @update:new-task-short-description="handleNewTaskShortDescription"
-      @update:new-task-description="handleNewTaskDescription"
-      @update:new-task-due-date="handleNewTaskDueDate"
-      @add-task="addTask"
-      @delete-task="deleteTask"
-    />
-    <!-- 右侧 -->
-    <SidebarRight :selected-task="selectedTask" />
+    <!-- 中间 -->
+    <div class="flex-1 overflow-auto bg-white px-8 py-6">
+      <h1 class="mb-6 text-3xl font-bold">My Tasks</h1>
+
+      <MainContent
+        :selected-list="selectedList"
+        :tasks="currentTasks"
+        :selected-task-id="selectedTask?.id ?? null"
+        :new-task-title="newTaskTitle"
+        :new-task-short-description="newTaskShortDescription"
+        :new-task-description="newTaskDescription"
+        :new-task-due-date="newTaskDueDate"
+        @select-task="handleSelectTask"
+        @toggle-task-status="handleToggleTaskStatus"
+        @update:new-task-title="handleNewTaskTitle"
+        @update:new-task-short-description="handleNewTaskShortDescription"
+        @update:new-task-description="handleNewTaskDescription"
+        @update:new-task-due-date="handleNewTaskDueDate"
+        @add-task="addTask"
+        @delete-task="deleteTask"
+      />
+    </div>
+
+    <!-- 右侧整体区域 -->
+    <div class="flex w-80 flex-col border-l bg-white">
+      <!-- 右上角用户区 -->
+      <div class="flex items-center justify-end gap-3 border-b px-4 py-4">
+        <div
+          class="flex h-10 w-10 items-center justify-center rounded-full bg-black text-sm font-semibold text-white"
+        >
+          {{ userInitial }}
+        </div>
+
+        <button
+          @click="handleLogout"
+          class="rounded-md bg-black px-4 py-2 text-sm text-white hover:opacity-90"
+        >
+          Logout
+        </button>
+      </div>
+
+      <!-- 右侧详情 -->
+      <div class="flex-1 overflow-hidden">
+        <SidebarRight
+          :selected-task="selectedTask"
+          @delete-task="deleteTask"
+        />
+      </div>
+    </div>
+
+    <!-- Create List Modal -->
+    <div
+      v-if="showCreateListModal"
+      class="fixed inset-0 z-50 flex items-center justify-center bg-black/30"
+    >
+      <div class="w-[400px] rounded-lg bg-white p-6 shadow-lg">
+        <h3 class="mb-4 text-lg font-bold">New List</h3>
+
+        <form class="space-y-3" @submit.prevent="submitCreateList">
+          <p v-if="listModalError" class="text-sm text-red-500">
+            {{ listModalError }}
+          </p>
+
+          <input
+            v-model="newListName"
+            type="text"
+            placeholder="List name"
+            class="w-full rounded-md border px-3 py-2"
+          />
+
+          <div class="flex justify-end gap-2">
+            <button
+              type="button"
+              class="rounded-md border px-3 py-1"
+              @click="showCreateListModal = false"
+            >
+              Cancel
+            </button>
+
+            <button
+              type="submit"
+              class="rounded-md bg-black px-4 py-2 text-white"
+            >
+              Create
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
   </div>
 </template>

@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { ref } from 'vue'
+
 // 定义接收的数据类型
 type TaskList = {
   id: number
@@ -18,6 +20,8 @@ const emit = defineEmits<{
   (e: 'delete-list', listId: number): void   // ⭐ 加这个
 }>()
 
+const isSidebarOpen = ref(false)
+
 function handleCreateList() {
   emit('create-list') // ⭐ 通知父组件
 }
@@ -35,12 +39,27 @@ function handleDelete(listId: number) {
 </script>
 
 <template>
-  <aside class="w-72 border-r bg-white p-4">
-    <div class="mb-6 flex items-center justify-between">
-      <h2 class="text-xl font-bold">My Lists</h2>
+  <aside
+    class="border-r bg-white p-4 transition-all duration-300"
+    :class="isSidebarOpen ? 'w-72' : 'w-20'"
+  >
+    <div
+      class="mb-6 flex items-center"
+      :class="isSidebarOpen ? 'justify-between' : 'justify-center'"
+    >
+      <h2 v-if="isSidebarOpen" class="text-xl font-bold">My Lists</h2>
 
       <button
-        class="rounded-md bg-black px-3 py-1 text-sm text-white hover:opacity-90"
+        class="rounded-md px-2 py-1 text-2xl text-black hover:bg-gray-100"
+        @click="isSidebarOpen = !isSidebarOpen"
+      >
+        ☰
+      </button>
+    </div>
+
+    <div v-if="isSidebarOpen" class="mb-4">
+      <button
+        class="w-full rounded-md bg-black px-3 py-1 text-sm text-white hover:opacity-90"
         @click="handleCreateList"
       >
         + New
@@ -62,10 +81,16 @@ function handleDelete(listId: number) {
           @click="handleClick(list.id)"
           class="flex-1 cursor-pointer"
         >
-          {{ list.name }}
+          <span v-if="isSidebarOpen">
+            {{ list.name }}
+          </span>
+          <span v-else>
+            {{ list.name.charAt(0).toUpperCase() }}
+          </span>
         </span>
 
         <button
+          v-if="isSidebarOpen"
           class="ml-2 text-red-500"
           @click.stop="handleDelete(list.id)"
         >
