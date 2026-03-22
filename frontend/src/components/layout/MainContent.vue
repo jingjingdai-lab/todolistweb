@@ -2,13 +2,15 @@
 import { computed, ref } from 'vue'
 
 
-// 定义 list 类型
+// ---------- Types ---------
+
+// Type for a task list
 type TaskList = {
   id: number
   name: string
 }
 
-// 定义 task 类型
+// Type for a task
 type Task = {
   id: number
   title: string
@@ -21,7 +23,7 @@ type Task = {
   }
 }
 
-// 接收父組件傳來的資料
+// ---------- Props ----------
 const props = defineProps<{
   selectedList: TaskList | null
   tasks: Task[]
@@ -32,7 +34,7 @@ const props = defineProps<{
   newTaskDueDate: string
 }>()
 
-// 向父組件發送事件
+// ---------- Emits ----------
 const emit = defineEmits<{
   (e: 'select-task', task: Task): void
   (e: 'toggle-task-status', taskId: number): void
@@ -46,39 +48,45 @@ const emit = defineEmits<{
 
 
 
-// 控制已完成区是否展开（默认收起）
+// ---------- Local state ----------
+
+// Controls whether the completed tasks section is expanded
 const showCompleted = ref(false)
 
+// Controls whether the task creation form is visible
+const showForm = ref(false)
 
-// TODO 任务
+// Local error message for task form validation
+const formError = ref('')
+
+// Minimum allowed due date (today)
+const minDueDate = new Date().toISOString().split('T')[0]
+
+
+// ---------- Computed ----------
+// Tasks that are still in TODO status
 const todoTasks = computed(() => {
   return props.tasks.filter((task) => task.status === 'TODO')
 })
 
-// DONE 任务
+// Tasks that are still in TODO status
 const doneTasks = computed(() => {
   return props.tasks.filter((task) => task.status === 'DONE')
 })
 
-//是否显示增加表单
-const showForm = ref(false)
 
-const formError = ref('')
 
-const minDueDate = new Date().toISOString().split('T')[0]
-
-// 点击任务时，通知父组件
+// ---------- Handlers ----------
 function handleTaskClick(task: Task) {
   emit('select-task', task)
 }
 
-// 點擊狀態按鈕：切換 TODO / DONE
+// Notify parent to toggle task status
 function handleToggleStatus(taskId: number) {
   emit('toggle-task-status', taskId)
 }
 
-
-
+// Validate form and notify parent to create a task
 function handleAddTask() {
     const title = props.newTaskTitle.trim()
     const shortDescription = props.newTaskShortDescription.trim()
@@ -110,30 +118,28 @@ function handleAddTask() {
     showForm.value = false
   }
 
-
+// Toggle the visibility of completed tasks
 function toggleCompleted() {
   showCompleted.value = !showCompleted.value
 }
 
-function handleDeleteTask(taskId: number) {
-  emit('delete-task', taskId)
-}
-
 </script>
+
+
 
 <template>
   <main class="flex-1 p-6">
-    <!-- 沒選 list 時 -->
     <div v-if="!selectedList" class="mt-10 text-center text-gray-400">
       No items to display
     </div>
 
-    <!-- 有選 list 時 -->
+    <!-- Content displayed when a list is selected -->
     <div v-else>
       <h2 class="mb-4 text-2xl font-bold">
         {{ selectedList.name }}
       </h2>
-
+      
+      <!-- Button to open the task creation form -->
       <div class="mb-6">
         <button
           class="rounded-md bg-black px-4 py-2 text-white hover:opacity-90"
@@ -143,7 +149,7 @@ function handleDeleteTask(taskId: number) {
         </button>
       </div>
 
-      <!-- TODO 區 -->
+      <!-- TODO tasks section -->
       <ul class="space-y-3">
         <li
           v-for="task in todoTasks"
@@ -156,7 +162,6 @@ function handleDeleteTask(taskId: number) {
           "
         >
           <div class="flex items-center justify-between gap-4">
-            <!-- 左邊區塊：點擊後選中 task -->
             <div
               class="flex-1 cursor-pointer"
               @click="handleTaskClick(task)"
@@ -167,7 +172,7 @@ function handleDeleteTask(taskId: number) {
               </p>
             </div>
 
-            <!-- 右邊按鈕 -->
+            <!-- Right side: action buttons -->
             <div class="flex gap-2">
               <button
                 type="button"
@@ -181,7 +186,7 @@ function handleDeleteTask(taskId: number) {
         </li>
       </ul>
 
-      <!-- DONE 區標題 -->
+      <!-- Header for completed tasks section -->
       <div class="mt-6 border-t pt-4">
         <button
           class="flex items-center gap-2 text-sm font-medium text-gray-600 hover:text-black"
@@ -192,7 +197,7 @@ function handleDeleteTask(taskId: number) {
         </button>
       </div>
 
-      <!-- DONE 區內容（默認收起） -->
+      <!-- Completed tasks section (collapsed by default) -->
       <ul v-if="showCompleted" class="mt-3 space-y-3">
         <li
           v-for="task in doneTasks"
@@ -205,7 +210,6 @@ function handleDeleteTask(taskId: number) {
           "
         >
           <div class="flex items-center justify-between gap-4">
-            <!-- 左邊區塊：點擊後選中 task -->
             <div
               class="flex-1 cursor-pointer"
               @click="handleTaskClick(task)"
@@ -216,7 +220,6 @@ function handleDeleteTask(taskId: number) {
               </p>
             </div>
 
-            <!-- 右邊按鈕 -->
             <div class="flex gap-2">
               <button
                 type="button"
@@ -230,7 +233,7 @@ function handleDeleteTask(taskId: number) {
         </li>
       </ul>
 
-      <!-- 弹窗 -->
+      <!-- Modal for creating a new task -->
       <div
         v-if="showForm"
         class="fixed inset-0 z-50 flex items-center justify-center bg-black/30"

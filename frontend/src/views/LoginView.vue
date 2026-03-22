@@ -3,15 +3,23 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import axios from 'axios'
 
+
+// ---------- Router ----------
 const router = useRouter()
 
+// ---------- Reactive state (form) ----------
 const email = ref('')
 const password = ref('')
 const errorMessage = ref('')
 
+
+// ---------- Auth actions ----------
+
+// Handle user login
 const handleLogin = async () => {
   errorMessage.value = ''
-
+  
+  // Basic validation: ensure fields are not empty
   if (!email.value || !password.value) {
     errorMessage.value = 'Please enter your email and password.'
     return
@@ -25,12 +33,13 @@ const handleLogin = async () => {
 
     console.log('login response:', response.data)
 
-    // ✅ 存 token
+     // Store authentication token in localStorage
     localStorage.setItem('token', response.data.access_token)
 
-    // ✅ 新增：存 user（重点！！）
+    // Store user information (used for UI display)
     localStorage.setItem('user', JSON.stringify(response.data.user))
-
+    
+    // Redirect to main page after successful login
     router.push('/')
   } catch (error: any) {
     errorMessage.value =
@@ -39,6 +48,7 @@ const handleLogin = async () => {
 }
 
 </script>
+
 
 <template>
   <div class="flex min-h-screen items-center justify-center bg-gray-100">

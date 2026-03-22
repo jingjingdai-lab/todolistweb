@@ -1,42 +1,53 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 
-// 定义接收的数据类型
+// ---------- Types ---------
+
+// Type for a task list
 type TaskList = {
   id: number
   name: string
 }
 
-// props：父组件传进来的数据
+// ---------- Props ----------
+
+// Data received from parent component
 defineProps<{
   lists: TaskList[]
   selectedListId: number | null
 }>()
 
-// emit：点击某个 list 时，通知父组件
+// ---------- Emits ----------
+// Events sent to parent component
 const emit = defineEmits<{
   (e: 'select-list', listId: number): void
   (e: 'create-list'): void
-  (e: 'delete-list', listId: number): void   // ⭐ 加这个
+  (e: 'delete-list', listId: number): void 
 }>()
 
+
+// ---------- Local state ----------
+// UI state for sidebar (open/close)
 const isSidebarOpen = ref(false)
 
+
+// ---------- Handlers ----------
 function handleCreateList() {
-  emit('create-list') // ⭐ 通知父组件
+  emit('create-list') 
 }
 
-// 点击某个 list
 function handleClick(listId: number) {
   emit('select-list', listId)
 }
 
-//处理删除的函数
 function handleDelete(listId: number) {
   emit('delete-list', listId)
 }
 
 </script>
+
+
+
 
 <template>
   <aside

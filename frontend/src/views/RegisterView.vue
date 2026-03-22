@@ -3,8 +3,10 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import axios from 'axios'
 
+// ---------- Router ----------
 const router = useRouter()
 
+// ---------- Reactive state (form) ----------
 const firstName = ref('')
 const lastName = ref('')
 const email = ref('')
@@ -14,6 +16,9 @@ const confirmPassword = ref('')
 const errorMessage = ref('')
 const successMessage = ref('')
 
+// ---------- Auth actions ----------
+
+// Handle user registration
 const handleRegister = async () => {
   errorMessage.value = ''
   successMessage.value = ''
@@ -29,18 +34,20 @@ const handleRegister = async () => {
     errorMessage.value = 'Please fill in all fields.'
     return
   }
-
+  
+  // Validate password confirmation
   if (email.value !== confirmEmail.value) {
     errorMessage.value = 'Emails do not match.'
     return
   }
-
+  
   if (password.value !== confirmPassword.value) {
     errorMessage.value = 'Passwords do not match.'
     return
   }
 
   try {
+    // Send registration request to backend
     const response = await axios.post('http://localhost:3000/auth/register', {
       firstName: firstName.value,
       lastName: lastName.value,
@@ -50,7 +57,8 @@ const handleRegister = async () => {
 
     console.log('register success:', response.data)
     successMessage.value = 'Account created successfully.'
-
+    
+    // Redirect to login page after a short delay
     setTimeout(() => {
       router.push('/login')
     }, 1000)
@@ -59,9 +67,9 @@ const handleRegister = async () => {
       error?.response?.data?.message || 'Register failed.'
   }
 }
-
-
 </script>
+
+
 
 <template>
   <div class="flex min-h-screen items-center justify-center bg-gray-100">
@@ -106,7 +114,7 @@ const handleRegister = async () => {
           />
         </div>
 
-        <!-- Confirm Email（新增） -->
+        <!-- Confirm Email -->
         <div>
           <label class="mb-1 block text-sm font-medium text-gray-700">
             Confirm email
