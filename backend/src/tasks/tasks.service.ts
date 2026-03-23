@@ -10,14 +10,14 @@ export class TasksService {
     private readonly taskRepository: Repository<Task>,
   ) {}
 
-  // ✅ 获取所有任务
+  // Get all tasks (with their related task list)
   findAll() {
     return this.taskRepository.find({
-      relations: ['taskList'], // 如果你不需要 list，可以删掉这一行
+      relations: ['taskList'],
     });
   }
 
-  // ✅ 创建任务
+  // Create a new task
   async create(
     title: string,
     shortDescription: string,
@@ -37,7 +37,7 @@ export class TasksService {
     return this.taskRepository.save(task);
   }
 
-  // ✅ 切换任务状态（TODO / DONE）
+  // Toggle task status (TODO ↔ DONE)
   async toggleStatus(id: number) {
     const task = await this.taskRepository.findOne({
       where: { id },
@@ -51,7 +51,7 @@ export class TasksService {
 
     return this.taskRepository.save(task);
   }
-  //删除task
+  // Delete a task by id
   async remove(id: number) {
     const task = await this.taskRepository.findOne({
       where: { id },

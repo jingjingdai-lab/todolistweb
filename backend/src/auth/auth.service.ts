@@ -12,21 +12,25 @@ import { JwtService } from '@nestjs/jwt';
 @Injectable()
 export class AuthService {
   constructor(
+    // Service to interact with users (DB)
     private readonly usersService: UsersService,
+
+    // Service to generate JWT tokens
     private readonly jwtService: JwtService,
   ) {}
 
+  // ================= REGISTER =================
   async register(registerDto: RegisterDto) {
     const { firstName, lastName, email, password } = registerDto;
 
     const existingUser = await this.usersService.findByEmail(email);
-
+    // If email already used → throw error
     if (existingUser) {
       throw new BadRequestException('Email already exists');
     }
-
+    // Hash password (very important for security)
     const hashedPassword = await bcrypt.hash(password, 10);
-
+    // Create new user in database
     const newUser = await this.usersService.create({
       firstName,
       lastName,
@@ -44,10 +48,10 @@ export class AuthService {
       },
     };
   }
-
+  // ================= LOGIN =================
   async login(loginDto: LoginDto) {
     const { email, password } = loginDto;
-
+    // Find user by email
     const user = await this.usersService.findByEmail(email);
 
     if (!user) {
@@ -59,14 +63,14 @@ export class AuthService {
     if (!isPasswordValid) {
       throw new UnauthorizedException('Invalid email or password');
     }
-
+    // Create JWT payload (data inside token)
     const payload = {
       sub: user.id,
       email: user.email,
     };
-
+    // Generate token
     const access_token = await this.jwtService.signAsync(payload);
-
+    // Return token + user info
     return {
       message: 'Login successful',
       access_token,

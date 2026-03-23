@@ -17,7 +17,7 @@ export class ListsService {
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
   ) {}
-
+  // Get all lists that belong to a specific user
   findAllByUser(userId: number) {
     return this.listRepository.find({
       where: {
@@ -26,7 +26,7 @@ export class ListsService {
       relations: ['tasks'],
     });
   }
-
+  // Create a new list for a given user
   async create(name: string, userId: number) {
     const user = await this.userRepository.findOne({
       where: { id: userId },
@@ -56,7 +56,7 @@ export class ListsService {
 
     return this.listRepository.save(list);
   }
-
+  // Remove extra spaces from the name
   async remove(id: number, userId: number) {
     const list = await this.listRepository.findOne({
       where: {
