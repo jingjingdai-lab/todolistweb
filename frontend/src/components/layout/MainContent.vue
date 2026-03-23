@@ -193,7 +193,7 @@ function toggleCompleted() {
           @click="toggleCompleted"
         >
           <span>{{ showCompleted ? '▼' : '▶' }}</span>
-          <span>Mes tâches terminées ({{ doneTasks.length }})</span>
+          <span>My completed tasks ({{ doneTasks.length }})</span>
         </button>
       </div>
 
