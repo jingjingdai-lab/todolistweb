@@ -11,6 +11,7 @@ The goal of this project is to build a simple task management system, similar to
 ```bash
 git clone https://github.com/jingjingdai-lab/todolistweb.git
 cd todolistweb
+cp backend/.env.example backend/.env
 docker compose up --build
 ```
 
