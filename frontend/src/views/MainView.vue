@@ -116,14 +116,16 @@ const userInitial = computed(() => {
 // ---------- Data fetching ----------
 // Fetch all lists from backend
 async function fetchLists() {
-  const res = await axios.get('http://localhost:3000/lists', {
+  const res = await axios.get('`${import.meta.env.VITE_API_BASE_URL}/lists`', {
     headers: getAuthHeaders(),
   })
   lists.value = res.data
 }
 // Fetch all tasks from backend
 async function fetchTasks() {
-  const res = await axios.get('http://localhost:3000/tasks', {
+const res = await axios.get(
+  `${import.meta.env.VITE_API_BASE_URL}/tasks`,
+  {
     headers: getAuthHeaders(),
   })
   tasks.value = res.data
@@ -155,7 +157,7 @@ async function submitCreateList() {
   try {
     // Create the new list
     await axios.post(
-      'http://localhost:3000/lists',
+      '`${import.meta.env.VITE_API_BASE_URL}/lists`',
       {
         name: newListName.value.trim(),
       },
@@ -184,7 +186,9 @@ async function deleteList(listId: number) {
   if (!confirmed) return
 
   try {
-    await axios.delete(`http://localhost:3000/lists/${listId}`, {
+    await axios.delete(
+  `${import.meta.env.VITE_API_BASE_URL}/lists/${listId}`,
+  {
       headers: getAuthHeaders(),
     })
     
@@ -219,7 +223,9 @@ async function addTask() {
 
   try {
      // Send new task data to backend
-    const res = await axios.post('http://localhost:3000/tasks', {
+    const res = await axios.post(
+  `${import.meta.env.VITE_API_BASE_URL}/tasks`,
+  {
       title: newTaskTitle.value,
       shortDescription: newTaskShortDescription.value,
       description: newTaskDescription.value,
@@ -246,7 +252,9 @@ async function deleteTask(taskId: number) {
   if (!confirmed) return
 
   try {
-    await axios.delete(`http://localhost:3000/tasks/${taskId}`)
+    await axios.delete(
+  `${import.meta.env.VITE_API_BASE_URL}/tasks/${taskId}`
+)
     await fetchTasks()
     
      // Clear selected task if needed
@@ -263,7 +271,9 @@ async function deleteTask(taskId: number) {
 // Toggle task status between TODO and DONE
 async function handleToggleTaskStatus(taskId: number) {
   try {
-    await axios.patch(`http://localhost:3000/tasks/${taskId}/toggle`)
+    await axios.patch(
+  `${import.meta.env.VITE_API_BASE_URL}/tasks/${taskId}/toggle`
+)
     await fetchTasks()
     
     // Update selected task if it is the one being modified

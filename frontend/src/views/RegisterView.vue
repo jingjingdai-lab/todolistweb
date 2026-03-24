@@ -48,7 +48,9 @@ const handleRegister = async () => {
 
   try {
     // Send registration request to backend
-    const response = await axios.post('http://localhost:3000/auth/register', {
+    const response = await axios.post(
+  `${import.meta.env.VITE_API_BASE_URL}/auth/register`,
+  {
       firstName: firstName.value,
       lastName: lastName.value,
       email: email.value,
