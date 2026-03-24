@@ -6,6 +6,10 @@ The goal of this project is to build a simple task management system, similar to
 
 ---
 
+## Live Demo
+Frontend: https://todolistweb-g1r24lbtg-jingjingdai-labs-projects.vercel.app  
+Backend API: https://todolist-backend-lekt.onrender.com
+
 ## Quick Start
 
 ```bash
@@ -31,6 +35,8 @@ docker compose up --build
 ### DevOps
 - Docker
 - Docker Compose
+- Vercel (frontend deployment)
+- Render (backend deployment)
 
 ---
 
@@ -126,6 +132,7 @@ npm run dev
 - Docker version is recommended (no local setup required)
 - Backend connects to PostgreSQL via Docker service `db`
 - Environment variables are defined in `backend/.env`
+- The deployed version uses Vercel (frontend) and Render (backend)
 
 ---
 
@@ -134,7 +141,6 @@ npm run dev
 - Edit task
 - Improve UI/UX
 - Better error handling
-- Deployment
 
 ---
 
