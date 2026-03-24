@@ -1,16 +1,17 @@
 <script setup lang="ts">
-// 定义 task 类型
 type Task = {
   id: number
   title: string
-  status: string
-  shortDescription: string
+  shortDescription?: string
   description?: string | null
-  dueDate: string
+  dueDate?: string
+  status: 'TODO' | 'DONE'
+  taskList?: {
+    id: number
+  }
   createdAt?: string
 }
 
-// 接收父组件传来的当前选中任务
 const props = defineProps<{
   selectedTask: Task | null
 }>()

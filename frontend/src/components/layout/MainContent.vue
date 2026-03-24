@@ -14,13 +14,14 @@ type TaskList = {
 type Task = {
   id: number
   title: string
-  shortDescription?: string | null
+  shortDescription?: string
   description?: string | null
-  dueDate?: string | null
+  dueDate?: string
   status: 'TODO' | 'DONE'
   taskList?: {
     id: number
   }
+  createdAt?: string
 }
 
 // ---------- Props ----------
