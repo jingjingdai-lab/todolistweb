@@ -18,14 +18,14 @@ type TaskList = {
 type Task = {
   id: number
   title: string
+  shortDescription?: string | null
+  description?: string | null
+  dueDate?: string | null
   status: 'TODO' | 'DONE'
-  description?: string
-  dueDate?: string
-  // Reference to the parent list
   taskList?: {
     id: number
   }
-  createdAt?: string // Creation timestamp
+  createdAt?: string
 }
 
 
@@ -73,7 +73,7 @@ onMounted(async () => {
     await fetchLists()
 
     // Select the first list by default if available
-    if (lists.value.length > 0) {
+    if (lists.value.length > 0 && lists.value[0]) {
       selectedListId.value = lists.value[0].id
     }
 

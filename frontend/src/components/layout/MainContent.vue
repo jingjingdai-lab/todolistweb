@@ -109,7 +109,7 @@ function handleAddTask() {
       return
     }
 
-    if (dueDate < minDueDate) {
+    if (minDueDate && dueDate < minDueDate) {
       formError.value = 'Due date cannot be earlier than today.'
       return
     }
