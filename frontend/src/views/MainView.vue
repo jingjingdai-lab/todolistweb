@@ -116,9 +116,9 @@ const userInitial = computed(() => {
 // ---------- Data fetching ----------
 // Fetch all lists from backend
 async function fetchLists() {
-  const res = await axios.get('`${import.meta.env.VITE_API_BASE_URL}/lists`', {
-    headers: getAuthHeaders(),
-  })
+  const res = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/lists`, {
+  headers: getAuthHeaders(),
+})
   lists.value = res.data
 }
 // Fetch all tasks from backend
@@ -157,14 +157,14 @@ async function submitCreateList() {
   try {
     // Create the new list
     await axios.post(
-      '`${import.meta.env.VITE_API_BASE_URL}/lists`',
-      {
-        name: newListName.value.trim(),
-      },
-      {
-        headers: getAuthHeaders(),
-      }
-    )
+        `${import.meta.env.VITE_API_BASE_URL}/lists`,
+        {
+          name: newListName.value.trim(),
+        },
+        {
+          headers: getAuthHeaders(),
+        }
+      )
     // Refresh list data after creation
     await fetchLists()
     
