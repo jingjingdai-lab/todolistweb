@@ -11,7 +11,17 @@ Frontend: https://todolistweb-g1r24lbtg-jingjingdai-labs-projects.vercel.app
 Backend API: https://todolist-backend-lekt.onrender.com
 ⚠️ Note: The backend is hosted on a free tier service, so the first request may take a few seconds to wake up. Please allow a short delay when accessing the app for the first time.
 
-## Quick Start
+
+## Demo Account
+You can use the following demo account to explore the application without creating a new user:
+
+- Email: test@test.com  
+- Password: 123456
+
+This account already contains some sample task lists and items.
+
+
+## Quick Start with docker
 
 ```bash
 git clone https://github.com/jingjingdai-lab/todolistweb.git
