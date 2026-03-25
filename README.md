@@ -9,6 +9,7 @@ The goal of this project is to build a simple task management system, similar to
 ## Live Demo
 Frontend: https://todolistweb-g1r24lbtg-jingjingdai-labs-projects.vercel.app  
 Backend API: https://todolist-backend-lekt.onrender.com
+⚠️ Note: The backend is hosted on a free tier service, so the first request may take a few seconds to wake up. Please allow a short delay when accessing the app for the first time.
 
 ## Quick Start
 
